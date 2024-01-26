@@ -3,5 +3,6 @@ module com.eliasheredia {
     requires javafx.fxml;
 
     opens com.eliasheredia to javafx.fxml;
+
     exports com.eliasheredia;
 }
