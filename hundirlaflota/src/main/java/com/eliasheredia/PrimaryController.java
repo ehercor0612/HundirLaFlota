@@ -40,22 +40,46 @@ public class PrimaryController {
             // }
         }
 
-        // INSERTADO BOTON DE EJEMPLO, NO FUNCIONA POR NODOS, SE ACCEDE DIRECTAMENTE A
-        // LA CELDA DESDE EL ID FXML.
+        // MAPA
+        for (int rowX = 0; rowX < 11; rowX++) {
+            for (int rowY = 0; rowY < 11; rowY++) {
+                Button ejemplo = new Button("");
+                gridMapa.add(ejemplo, rowX, rowY);
+                ejemplo.setPrefWidth(100);
+                ejemplo.setPrefHeight(100);
+                GridPane.setColumnSpan(ejemplo, 1);
+                ejemplo.setStyle("-fx-background-color: lightblue; -fx-border-color: #000000;");
+                ejemplo.setOnMouseEntered(e -> {
+                    ejemplo.setStyle(
+                            "-fx-background-color: lightblue; -fx-border-color: #000000; -fx-border-width: 2px; -fx-cursor: hand;");
+                });
+                ejemplo.setOnMouseExited(e -> {
+                    ejemplo.setStyle(
+                            "-fx-background-color: lightblue; -fx-border-color: #000000;");
+                });
+            }
+        }
 
-        // TO DO: rellenar todas las casillas con minipanes para pintarlos, para que
-        // cuando tengamos barcos, que al clicarlos resalte. No hacerlos grandes, hace
-        // falta
-        // ver impacto
+        // RADAR
+        for (int rowX = 0; rowX < 11; rowX++) {
+            for (int rowY = 0; rowY < 11; rowY++) {
+                Button ejemplo = new Button("");
+                gridRadar.add(ejemplo, rowX, rowY);
+                ejemplo.setPrefWidth(100);
+                ejemplo.setPrefHeight(100);
+                GridPane.setColumnSpan(ejemplo, 1);
+                ejemplo.setStyle("-fx-background-color: black; -fx-border-color: #00ff00;");
+                ejemplo.setOnMouseEntered(e -> {
+                    ejemplo.setStyle(
+                            "-fx-background-color: black; -fx-border-color: #00ff00; -fx-border-width: 3px; -fx-cursor: hand;");
+                });
+                ejemplo.setOnMouseExited(e -> {
+                    ejemplo.setStyle(
+                            "-fx-background-color: black; -fx-border-color: #00ff00;");
+                });
+            }
+        }
 
-        Button ejemplo = new Button("Ejemplo");
-        // GridPane.setColumnIndex(ejemplo, 5);
-        // GridPane.setRowIndex(ejemplo, 5);
-        // GridPane.setRowSpan(ejemplo, 2);
-        gridMapa.add(ejemplo, 7, 7);
-        ejemplo.setPrefWidth(300);
-        GridPane.setColumnSpan(ejemplo, 3);
-        ejemplo.setStyle("-fx-background-color: red;");
     }
 
 }
