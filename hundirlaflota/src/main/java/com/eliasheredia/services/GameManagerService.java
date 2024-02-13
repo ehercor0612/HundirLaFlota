@@ -4,15 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.scene.Node;
-import javafx.scene.layout.GridPane;
 
 public class GameManagerService {
 
     List<JugadorService> jugadores = new ArrayList<JugadorService>();
 
-    private GameManagerService(List<JugadorService> jugadores) {
+    public GameManagerService(List<JugadorService> jugadores) {
         this.jugadores = jugadores;
     };
+
+    public void iniciarPartida() {
+        // Iniciar los hilos para cada jugador
+        for (JugadorService jugador : jugadores) {
+            jugador.start();
+        }
+    }
 
     public String checkJugada(JugadorService jugadorActual, Node posicionAtacada) {
         for (var jugador : this.jugadores) {

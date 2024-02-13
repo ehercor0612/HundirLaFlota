@@ -3,6 +3,8 @@ package com.eliasheredia;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import com.eliasheredia.services.JugadorService;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -34,6 +36,7 @@ public class PrimaryController {
 
     @FXML
     public void initialize() {
+        JugadorService jugador1 = new JugadorService(true, gridMapa);
         for (Node node : this.gridMapa.getChildren()) {
             // if (GridPane.getColumnIndex(node) == 5 && GridPane.getRowIndex(node) == 5) {
             node.setStyle("-fx-background-color: red;");
