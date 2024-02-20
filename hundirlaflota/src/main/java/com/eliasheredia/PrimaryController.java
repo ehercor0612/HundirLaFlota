@@ -36,7 +36,9 @@ public class PrimaryController {
 
     @FXML
     public void initialize() {
-        JugadorService jugador1 = new JugadorService(true, gridMapa);
+
+        JugadorService jugador1 = new JugadorService(1, true, gridMapa, jugador, labelLog);
+
         for (Node node : this.gridMapa.getChildren()) {
             // if (GridPane.getColumnIndex(node) == 5 && GridPane.getRowIndex(node) == 5) {
             node.setStyle("-fx-background-color: red;");
