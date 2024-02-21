@@ -42,7 +42,7 @@ public class App extends Application {
         labelLog = (Text) scene.lookup("#labelLog");
 
         // Crear instancias de los jugadores
-        JugadorService jugador1 = new JugadorService(1, true, gridMapa, jugador, labelLog); // Establecer empiezaPartida
+        JugadorService jugador1 = new JugadorService(1, true, gridMapa, jugador, labelLog);
         JugadorService jugador2 = new JugadorService(2, false, gridRadar, jugador, labelLog);
 
         // Configurar gridMapa en cada jugador
@@ -55,7 +55,7 @@ public class App extends Application {
         jugadores.add(jugador2);
 
         // Crear instancia de GameManagerService
-        GameManagerService gameManager = new GameManagerService(jugadores);
+        GameManagerService gameManager = new GameManagerService(jugadores, gridMapa, gridRadar);
 
         // Iniciar la partida
         gameManager.iniciarPartida();
