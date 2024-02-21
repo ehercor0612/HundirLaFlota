@@ -1,11 +1,9 @@
 package com.eliasheredia;
 
 import javafx.application.Application;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -22,20 +20,13 @@ import com.eliasheredia.services.JugadorService;
  */
 public class App extends Application {
 
-    @FXML
     private static GridPane gridMapa;
 
-    @FXML
     private static GridPane gridRadar;
 
-    @FXML
-    private Text jugador;
+    private static Text jugador;
 
-    @FXML
-    private Text labelLog;
-
-    @FXML
-    private Button primaryButton;
+    private static Text labelLog;
 
     private static Scene scene;
 
@@ -52,8 +43,6 @@ public class App extends Application {
 
         // Crear instancias de los jugadores
         JugadorService jugador1 = new JugadorService(1, true, gridMapa, jugador, labelLog); // Establecer empiezaPartida
-                                                                                            // a
-                                                                                            // true o false según
         JugadorService jugador2 = new JugadorService(2, false, gridRadar, jugador, labelLog);
 
         // Configurar gridMapa en cada jugador
@@ -71,6 +60,10 @@ public class App extends Application {
         // Iniciar la partida
         gameManager.iniciarPartida();
 
+    }
+
+    public static void main(String[] args) {
+        launch();
     }
 
     static void setRoot(String fxml) throws IOException {
