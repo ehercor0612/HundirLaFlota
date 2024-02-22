@@ -37,7 +37,7 @@ public class PrimaryController {
     @FXML
     public void initialize() {
 
-        JugadorService jugador1 = new JugadorService(1, true, gridMapa, jugador, labelLog);
+        JugadorService jugador1 = new JugadorService(1, true, gridMapa, gridRadar, jugador, labelLog);
 
         for (Node node : this.gridMapa.getChildren()) {
             // if (GridPane.getColumnIndex(node) == 5 && GridPane.getRowIndex(node) == 5) {

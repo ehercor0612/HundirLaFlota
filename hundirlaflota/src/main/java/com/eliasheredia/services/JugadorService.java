@@ -29,7 +29,8 @@ public class JugadorService extends Thread {
     boolean jugadorEnemigoEnTurno = false;
     ArrayList<PosicionFlota> posicionFlotas = new ArrayList<PosicionFlota>();
 
-    public JugadorService(int numJugador, boolean empiezaPartida, GridPane gridMapa, Text jugador, Text labelLog) {
+    public JugadorService(int numJugador, boolean empiezaPartida, GridPane gridMapa, GridPane gridRadar, Text jugador,
+            Text labelLog) {
         this.numJugador = numJugador;
         this.estaEnTurno = empiezaPartida;
         this.gridMapa = gridMapa;
@@ -43,6 +44,10 @@ public class JugadorService extends Thread {
 
     public void setGridMapa(GridPane gridMapa) {
         this.gridMapa = gridMapa;
+    }
+
+    public void setGridRadar(GridPane gridRadar) {
+        this.gridRadar = gridRadar;
     }
 
     public void setJugador(Text jugador) {

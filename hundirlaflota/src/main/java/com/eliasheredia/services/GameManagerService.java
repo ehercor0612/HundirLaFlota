@@ -9,37 +9,41 @@ import java.util.Random;
 import com.eliasheredia.models.PosicionFlota;
 
 import javafx.application.Platform;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
 public class GameManagerService {
 
-    private static GridPane gridMapa;
+    private GridPane gridMapa;
+    private GridPane gridRadar;
+    private List<JugadorService> jugadores = new ArrayList<>();
 
-    private static GridPane gridRadar;
-
-    List<JugadorService> jugadores = new ArrayList<JugadorService>();
-
-    List<PosicionFlota> barcosJugador1 = new ArrayList<PosicionFlota>();
-    List<PosicionFlota> barcosJugador2 = new ArrayList<PosicionFlota>();
+    private boolean partidaEnCurso = false;
 
     public GameManagerService(List<JugadorService> jugadores, GridPane gridMapa, GridPane gridRadar) {
         this.jugadores = jugadores;
         this.gridMapa = gridMapa;
         this.gridRadar = gridRadar;
-    };
+    }
 
     public void iniciarPartida() {
+        if (partidaEnCurso) {
+            return; // La partida ya está en curso
+        }
+
+        partidaEnCurso = true;
         for (JugadorService jugador : jugadores) {
-            añadirBarcos();
-            jugador.start();
+            añadirBarcos(jugador);
+            jugador.start(); // Iniciar el turno del jugador
         }
     }
 
-    public void añadirBarcos() {
+    public void terminarPartida() {
+        partidaEnCurso = false;
+    }
+
+    public void añadirBarcos(JugadorService jugadorActual) {
         Platform.runLater(() -> {
             try {
                 Random rand = new Random();
@@ -56,7 +60,10 @@ public class GameManagerService {
                 imageView.setFitWidth(50);
                 imageView.setFitHeight(50);
 
-                gridMapa.add(imageView, fila, columna);
+                // Determinar en qué grid añadir la imagen según el jugador actual
+                GridPane grid = jugadorActual == jugadores.get(0) ? gridMapa : gridRadar;
+
+                grid.add(imageView, fila, columna);
                 GridPane.setColumnSpan(imageView, 1);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();

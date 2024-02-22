@@ -38,16 +38,17 @@ public class App extends Application {
 
         // Obtiene una referencia al gridMapa desde el controlador FXML
         gridMapa = (GridPane) scene.lookup("#gridMapa");
+        gridRadar = (GridPane) scene.lookup("#gridRadar");
         jugador = (Text) scene.lookup("#jugador");
         labelLog = (Text) scene.lookup("#labelLog");
 
         // Crear instancias de los jugadores
-        JugadorService jugador1 = new JugadorService(1, true, gridMapa, jugador, labelLog);
-        JugadorService jugador2 = new JugadorService(2, false, gridRadar, jugador, labelLog);
+        JugadorService jugador1 = new JugadorService(1, true, gridMapa, gridRadar, jugador, labelLog);
+        JugadorService jugador2 = new JugadorService(2, false, gridMapa, gridRadar, jugador, labelLog);
 
         // Configurar gridMapa en cada jugador
         jugador1.setGridMapa(gridMapa);
-        jugador2.setGridMapa(gridRadar);
+        jugador2.setGridRadar(gridRadar);
 
         // Agregar jugadores a la lista de jugadores
         List<JugadorService> jugadores = new ArrayList<>();
