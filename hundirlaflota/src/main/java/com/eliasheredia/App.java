@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -24,6 +25,8 @@ public class App extends Application {
 
     private static GridPane gridRadar;
 
+    private static ScrollPane scrollPanel;
+
     private static Text jugador;
 
     private static Text labelLog;
@@ -39,6 +42,7 @@ public class App extends Application {
         // Obtiene una referencia al gridMapa desde el controlador FXML
         gridMapa = (GridPane) scene.lookup("#gridMapa");
         gridRadar = (GridPane) scene.lookup("#gridRadar");
+        scrollPanel = (ScrollPane) scene.lookup("#scroll");
         jugador = (Text) scene.lookup("#jugador");
         labelLog = (Text) scene.lookup("#labelLog");
 
@@ -56,7 +60,7 @@ public class App extends Application {
         jugadores.add(jugador2);
 
         // Crear instancia de GameManagerService
-        GameManagerService gameManager = new GameManagerService(jugadores, gridMapa, gridRadar);
+        GameManagerService gameManager = new GameManagerService(jugadores, gridMapa, gridRadar, scrollPanel);
 
         // Iniciar la partida
         gameManager.iniciarPartida();
