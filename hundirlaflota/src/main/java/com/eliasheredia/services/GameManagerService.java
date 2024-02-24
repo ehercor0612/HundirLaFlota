@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import com.eliasheredia.models.PosicionFlota;
 import com.eliasheredia.models.barcos.jugador1.Barca1;
 import com.eliasheredia.models.barcos.jugador1.Crucero1;
 import com.eliasheredia.models.barcos.jugador1.Lancha1;
@@ -16,6 +17,7 @@ import com.eliasheredia.models.barcos.jugador2.Lancha2;
 import com.eliasheredia.models.barcos.jugador2.Submarino2;
 
 import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -74,11 +76,11 @@ public class GameManagerService {
                     rutaImagen = "src\\main\\resources\\com\\eliasheredia\\imagenes\\gato2.png";
                 }
 
-                // Contador para mantener el número total de barcos generados
-                int barcosGenerados = 0;
-
                 // Texto para mostrar qué clase de barcos se generan
                 StringBuilder textoClaseBarco = new StringBuilder(scrollPanel.getContent().toString());
+
+                // Lista de posiciones ocupadas por los barcos generados
+                List<PosicionFlota> posicionesOcupadas = new ArrayList<>();
 
                 for (Class<?> claseBarco : listaBarcosJugador) {
                     // Agregar el nombre de la clase de barco al texto
@@ -92,44 +94,58 @@ public class GameManagerService {
                     // Obtener el tamaño del barco
                     int tamanoBarco = (int) claseBarco.getDeclaredField("tamano").get(barco);
 
-                    // Generar una posición aleatoria dentro de los límites del GridPane
-                    Random rand = new Random();
-                    int fila = rand.nextInt(11 - tamanoBarco + 1); // Ajustar para que no exceda los límites
-                    int columna = rand.nextInt(11 - tamanoBarco + 1); // Ajustar para que no exceda los límites
+                    boolean generado = false;
 
-                    // Ajustar la posición si el barco está demasiado cerca del borde
-                    fila = Math.max(0, Math.min(fila, 11 - tamanoBarco));
-                    columna = Math.max(0, Math.min(columna, 11 - tamanoBarco));
+                    // Intentar generar una posición aleatoria válida para el barco
+                    while (!generado) {
+                        // Generar una posición aleatoria dentro de los límites del GridPane
+                        Random rand = new Random();
+                        int fila = rand.nextInt(11 - tamanoBarco); // Ajustar para que no exceda los límites
+                        int columna = rand.nextInt(11 - tamanoBarco); // Ajustar para que no exceda los límites
 
-                    // Generar las imágenes de los barcos y colocarlas en el grid correspondiente
-                    for (int j = 0; j < tamanoBarco; j++) {
-                        int filaActual = fila;
-                        int columnaActual = columna;
-
-                        if (tamanoBarco > 1) {
-                            // Cambiar la fila o columna actual dependiendo de la orientación del barco
-                            if (claseBarco.equals(Crucero1.class) || claseBarco.equals(Crucero2.class)) {
-                                filaActual += j;
-                            } else {
-                                columnaActual += j;
+                        // Verificar si hay un barco en la proximidad
+                        boolean posicionValida = true;
+                        for (PosicionFlota posicion : posicionesOcupadas) {
+                            if (Math.abs(fila - posicion.getFila()) <= 1
+                                    && Math.abs(columna - posicion.getColumna()) <= 1) {
+                                posicionValida = false;
+                                break;
                             }
                         }
 
-                        // Cargar la imagen desde el archivo correspondiente al grid
-                        Image imagen = new Image(new FileInputStream(rutaImagen));
+                        if (posicionValida) {
+                            generado = true;
 
-                        // Crear ImageView y asignar la imagen
-                        ImageView imageView = new ImageView(imagen);
-                        imageView.setFitWidth(50);
-                        imageView.setFitHeight(50);
+                            // Registrar las posiciones ocupadas por el nuevo barco
+                            for (int j = 0; j < tamanoBarco; j++) {
+                                int filaActual = fila;
+                                int columnaActual = columna;
 
-                        // Añadir la imagen a la casilla correspondiente
-                        grid.add(imageView, columnaActual, filaActual);
-                        GridPane.setColumnSpan(imageView, 1);
+                                if (tamanoBarco > 1) {
+                                    // Cambiar la fila o columna actual dependiendo de la orientación del barco
+                                    if (claseBarco.equals(Crucero1.class) || claseBarco.equals(Crucero2.class)) {
+                                        filaActual += j;
+                                    } else {
+                                        columnaActual += j;
+                                    }
+                                }
+
+                                posicionesOcupadas.add(new PosicionFlota(filaActual, columnaActual));
+
+                                // Cargar la imagen desde el archivo correspondiente al grid
+                                Image imagen = new Image(new FileInputStream(rutaImagen));
+
+                                // Crear ImageView y asignar la imagen
+                                ImageView imageView = new ImageView(imagen);
+                                imageView.setFitWidth(50);
+                                imageView.setFitHeight(50);
+
+                                // Añadir la imagen a la casilla correspondiente
+                                grid.add(imageView, columnaActual, filaActual);
+                                GridPane.setColumnSpan(imageView, 1);
+                            }
+                        }
                     }
-
-                    // Incrementar el contador de barcos generados
-                    barcosGenerados++;
                 }
 
                 // Añadir el texto al ScrollPane
