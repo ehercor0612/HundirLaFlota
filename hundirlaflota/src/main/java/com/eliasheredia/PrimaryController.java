@@ -22,9 +22,6 @@ public class PrimaryController {
     private GridPane gridRadar;
 
     @FXML
-    private Text jugador;
-
-    @FXML
     private Text labelLog;
 
     @FXML
@@ -41,7 +38,7 @@ public class PrimaryController {
     @FXML
     public void initialize() {
 
-        JugadorService jugador1 = new JugadorService(1, true, gridMapa, gridRadar, jugador, labelLog, scrollPanel);
+        JugadorService jugador1 = new JugadorService(1, true, gridMapa, gridRadar, labelLog, scrollPanel);
 
         for (Node node : this.gridMapa.getChildren()) {
             // if (GridPane.getColumnIndex(node) == 5 && GridPane.getRowIndex(node) == 5) {
@@ -77,14 +74,14 @@ public class PrimaryController {
                 ejemplo.setPrefWidth(100);
                 ejemplo.setPrefHeight(100);
                 GridPane.setColumnSpan(ejemplo, 1);
-                ejemplo.setStyle("-fx-background-color: black; -fx-border-color: #00ff00;");
+                ejemplo.setStyle("-fx-background-color: lightred; -fx-border-color: #000000;");
                 ejemplo.setOnMouseEntered(e -> {
                     ejemplo.setStyle(
-                            "-fx-background-color: black; -fx-border-color: #00ff00; -fx-border-width: 3px; -fx-cursor: hand;");
+                            "-fx-background-color: lightred; -fx-border-color: #000000; -fx-border-width: 3px; -fx-cursor: hand;");
                 });
                 ejemplo.setOnMouseExited(e -> {
                     ejemplo.setStyle(
-                            "-fx-background-color: black; -fx-border-color: #00ff00;");
+                            "-fx-background-color: lightred; -fx-border-color: #000000;");
                 });
             }
         }

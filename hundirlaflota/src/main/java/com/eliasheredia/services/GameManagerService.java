@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import com.eliasheredia.models.EstadosPosicion;
 import com.eliasheredia.models.PosicionFlota;
 import com.eliasheredia.models.barcos.jugador1.Barca1;
 import com.eliasheredia.models.barcos.jugador1.Crucero1;
@@ -15,9 +16,10 @@ import com.eliasheredia.models.barcos.jugador2.Barca2;
 import com.eliasheredia.models.barcos.jugador2.Crucero2;
 import com.eliasheredia.models.barcos.jugador2.Lancha2;
 import com.eliasheredia.models.barcos.jugador2.Submarino2;
+import com.eliasheredia.services.JugadorService;
 
 import javafx.application.Platform;
-import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -51,6 +53,9 @@ public class GameManagerService {
             añadirBarcos(jugador);
             jugador.start(); // Iniciar el turno del jugador
         }
+        for (JugadorService jugadorService : jugadores) {
+            seleccionarCasillaAleatoria(jugadorService);
+        }
     }
 
     public void terminarPartida() {
@@ -77,15 +82,14 @@ public class GameManagerService {
                 }
 
                 // Texto para mostrar qué clase de barcos se generan
-                StringBuilder textoClaseBarco = new StringBuilder();
+                StringBuilder textoClaseBarco = new StringBuilder(scrollPanel.getContent().toString());
 
                 // Lista de posiciones ocupadas por los barcos generados
                 List<PosicionFlota> posicionesOcupadas = new ArrayList<>();
 
                 for (Class<?> claseBarco : listaBarcosJugador) {
                     // Agregar el nombre de la clase de barco al texto
-                    textoClaseBarco.append("Barcos para Jugador ").append(jugadorActual == jugadores.get(0) ? "1" : "2")
-                            .append(":\n");
+                    textoClaseBarco.append("Barcos para Jugador ").append(jugadorActual.getNumJugador()).append(":\n");
                     textoClaseBarco.append(claseBarco.getSimpleName()).append("\n");
 
                     // Crear una instancia de la clase de barco seleccionada
@@ -148,23 +152,98 @@ public class GameManagerService {
                     }
                 }
 
-                // Obtener el texto actual del ScrollPane
-                Text textoActual = new Text();
-                if (scrollPanel.getContent() instanceof Text) {
-                    textoActual = (Text) scrollPanel.getContent();
-                }
-
-                // Concatenar el nuevo texto con el texto existente
-                String nuevoTexto = textoActual.getText() + textoClaseBarco.toString();
-
-                // Establecer el nuevo texto en el ScrollPane
-                textoActual.setText(nuevoTexto);
-                scrollPanel.setContent(textoActual);
-
+                // Añadir el texto al ScrollPane
+                Text texto = new Text(textoClaseBarco.toString());
+                scrollPanel.setContent(texto);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
     }
 
+    // Método para seleccionar una casilla aleatoria
+    public void seleccionarCasillaAleatoria(JugadorService jugadorActual) {
+        Random rand = new Random();
+        int fila = rand.nextInt(11);
+        int columna = rand.nextInt(11);
+
+        System.out.println("Jugador: " + jugadorActual.getNumJugador() + " seleccionó la casilla: (" + fila + ", "
+                + columna + ")");
+
+        EstadosPosicion estado = verificarCasilla(jugadorActual, fila, columna);
+        declararLog(fila, columna, estado, jugadorActual);
+        cambiarColorCasilla(jugadorActual, fila, columna);
+    }
+
+    // Método para verificar el estado de la casilla
+    private EstadosPosicion verificarCasilla(JugadorService jugadorActual, int fila, int columna) {
+        for (PosicionFlota posicion : jugadorActual.getPosicionFlotas()) {
+            if (posicion.getFila() == fila && posicion.getColumna() == columna) {
+                return EstadosPosicion.TOCADO;
+            }
+        }
+        return EstadosPosicion.AGUA;
+    }
+
+    // Método para cambiar el color de la casilla
+    private void cambiarColorCasilla(JugadorService jugadorActual, int fila, int columna) {
+        Platform.runLater(() -> {
+            Button ejemplo = new Button("");
+            if (jugadorActual == jugadores.get(0)) {
+                // Si el jugadorActual es el jugador1, añadir el botón en el gridRadar
+                gridRadar.add(ejemplo, columna, fila);
+            } else {
+                // Si el jugadorActual es el jugador2, añadir el botón en el gridMapa
+                gridMapa.add(ejemplo, fila, columna);
+            }
+            ejemplo.setPrefWidth(100);
+            ejemplo.setPrefHeight(100);
+            GridPane.setColumnSpan(ejemplo, 1);
+            // Cambiar el color del botón para que sea visible en el gridRadar
+            ejemplo.setStyle("-fx-background-color: rgba(0, 255, 0, 0.5); -fx-border-color: #000000;");
+
+            ejemplo.setOnMouseEntered(e -> {
+                ejemplo.setStyle(
+                        "-fx-background-color: rgba(0, 255, 0, 0.7); -fx-border-color: #000000; -fx-border-width: 2px; -fx-cursor: hand;");
+            });
+
+            ejemplo.setOnMouseExited(e -> {
+                ejemplo.setStyle(
+                        "-fx-background-color: rgba(0, 255, 0, 0.5); -fx-border-color: #000000;");
+            });
+        });
+    }
+
+    // Método para declarar el estado de la casilla en el log
+    private void declararLog(int fila, int columna, EstadosPosicion estado, JugadorService jugadorActual) {
+        Platform.runLater(() -> {
+            String mensaje;
+            switch (estado) {
+                case AGUA:
+                    mensaje = "AGUA";
+                    break;
+                case TOCADO:
+                    mensaje = "TOCADO";
+                    break;
+                case TOCADO_HUNDIDO:
+                    mensaje = "TOCADO HUNDIDO";
+                    break;
+                default:
+                    mensaje = "Estado desconocido";
+                    break;
+            }
+            // Obtener el texto actual del ScrollPane
+            Text textoActual = (Text) scrollPanel.getContent();
+            String textoAnterior = textoActual.getText();
+            // Concatenar el nuevo mensaje al texto anterior
+            String nuevoTexto = textoAnterior + "\nJugador " + jugadorActual.getNumJugador()
+                    + " seleccionó la casilla: ("
+                    + fila
+                    + ", "
+                    + columna + ") - Estado: " + mensaje;
+            // Crear un nuevo objeto Text con el nuevo texto y establecerlo en el ScrollPane
+            Text nuevoTextoNode = new Text(nuevoTexto);
+            scrollPanel.setContent(nuevoTextoNode);
+        });
+    }
 }

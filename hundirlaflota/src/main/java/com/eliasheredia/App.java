@@ -27,8 +27,6 @@ public class App extends Application {
 
     private static ScrollPane scrollPanel;
 
-    private static Text jugador;
-
     private static Text labelLog;
 
     private static Scene scene;
@@ -43,12 +41,11 @@ public class App extends Application {
         gridMapa = (GridPane) scene.lookup("#gridMapa");
         gridRadar = (GridPane) scene.lookup("#gridRadar");
         scrollPanel = (ScrollPane) scene.lookup("#scroll");
-        jugador = (Text) scene.lookup("#jugador");
         labelLog = (Text) scene.lookup("#labelLog");
 
         // Crear instancias de los jugadores
-        JugadorService jugador1 = new JugadorService(1, true, gridMapa, gridRadar, jugador, labelLog, scrollPanel);
-        JugadorService jugador2 = new JugadorService(2, false, gridMapa, gridRadar, jugador, labelLog, scrollPanel);
+        JugadorService jugador1 = new JugadorService(1, true, gridMapa, gridRadar, labelLog, scrollPanel);
+        JugadorService jugador2 = new JugadorService(2, false, gridMapa, gridRadar, labelLog, scrollPanel);
 
         // Configurar gridMapa en cada jugador
         jugador1.setGridMapa(gridMapa);

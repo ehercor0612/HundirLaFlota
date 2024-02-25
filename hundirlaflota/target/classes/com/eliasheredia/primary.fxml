@@ -14,11 +14,34 @@
 
 <VBox alignment="TOP_CENTER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="1200.0" spacing="20.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.eliasheredia.PrimaryController">
    <children>
-      <Text fx:id="jugador" strokeType="OUTSIDE" strokeWidth="0.0" text="Jugador">
-         <font>
-            <Font size="32.0" />
-         </font>
-      </Text>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+         <children>
+            <Text fx:id="jugador1" strokeType="OUTSIDE" strokeWidth="0.0" text="Jugador 1">
+               <font>
+                  <Font size="32.0" />
+               </font>
+               <HBox.margin>
+                  <Insets right="100.0" />
+               </HBox.margin>
+            </Text>
+            <Text fx:id="ganador" strokeType="OUTSIDE" strokeWidth="0.0">
+               <font>
+                  <Font size="32.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="100.0" right="100.0" />
+               </HBox.margin>
+            </Text>
+            <Text fx:id="jugador2" strokeType="OUTSIDE" strokeWidth="0.0" text="Jugador 2">
+               <font>
+                  <Font size="32.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="100.0" />
+               </HBox.margin>
+            </Text>
+         </children>
+      </HBox>
       <HBox minHeight="600.0" spacing="20.0">
          <children>
             <GridPane fx:id="gridMapa" gridLinesVisible="true" style="-fx-background-color: lightblue;">
