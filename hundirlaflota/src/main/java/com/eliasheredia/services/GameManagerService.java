@@ -241,8 +241,12 @@ public class GameManagerService {
                                 imageView.setFitWidth(50);
                                 imageView.setFitHeight(50);
 
-                                // Añadir la imagen a la casilla correspondiente
-                                grid.add(imageView, columnaActual, filaActual);
+                                // Ajustar las coordenadas según el jugador antes de agregar la imagen al grid
+                                if (jugadorActual == jugadores.get(0)) {
+                                    grid.add(imageView, filaActual, columnaActual);
+                                } else {
+                                    grid.add(imageView, columnaActual, filaActual);
+                                }
                                 GridPane.setColumnSpan(imageView, 1);
                             }
                         }
