@@ -77,7 +77,7 @@ public class GameManagerService {
                 }
 
                 // Texto para mostrar qué clase de barcos se generan
-                StringBuilder textoClaseBarco = new StringBuilder(scrollPanel.getContent().toString());
+                StringBuilder textoClaseBarco = new StringBuilder();
 
                 // Lista de posiciones ocupadas por los barcos generados
                 List<PosicionFlota> posicionesOcupadas = new ArrayList<>();
@@ -148,12 +148,23 @@ public class GameManagerService {
                     }
                 }
 
-                // Añadir el texto al ScrollPane
-                Text texto = new Text(textoClaseBarco.toString());
-                scrollPanel.setContent(texto);
+                // Obtener el texto actual del ScrollPane
+                Text textoActual = new Text();
+                if (scrollPanel.getContent() instanceof Text) {
+                    textoActual = (Text) scrollPanel.getContent();
+                }
+
+                // Concatenar el nuevo texto con el texto existente
+                String nuevoTexto = textoActual.getText() + textoClaseBarco.toString();
+
+                // Establecer el nuevo texto en el ScrollPane
+                textoActual.setText(nuevoTexto);
+                scrollPanel.setContent(textoActual);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
     }
+
 }

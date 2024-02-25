@@ -47,8 +47,8 @@ public class App extends Application {
         labelLog = (Text) scene.lookup("#labelLog");
 
         // Crear instancias de los jugadores
-        JugadorService jugador1 = new JugadorService(1, true, gridMapa, gridRadar, jugador, labelLog);
-        JugadorService jugador2 = new JugadorService(2, false, gridMapa, gridRadar, jugador, labelLog);
+        JugadorService jugador1 = new JugadorService(1, true, gridMapa, gridRadar, jugador, labelLog, scrollPanel);
+        JugadorService jugador2 = new JugadorService(2, false, gridMapa, gridRadar, jugador, labelLog, scrollPanel);
 
         // Configurar gridMapa en cada jugador
         jugador1.setGridMapa(gridMapa);

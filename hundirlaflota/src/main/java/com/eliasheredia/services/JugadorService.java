@@ -11,6 +11,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -25,17 +26,19 @@ public class JugadorService extends Thread {
     private GridPane gridRadar;
     private Text jugador;
     private Text labelLog;
+    private ScrollPane scrollPanel;
     boolean estaEnTurno = false;
     boolean jugadorEnemigoEnTurno = false;
     ArrayList<PosicionFlota> posicionFlotas = new ArrayList<PosicionFlota>();
 
     public JugadorService(int numJugador, boolean empiezaPartida, GridPane gridMapa, GridPane gridRadar, Text jugador,
-            Text labelLog) {
+            Text labelLog, ScrollPane scrollPanel) {
         this.numJugador = numJugador;
         this.estaEnTurno = empiezaPartida;
         this.gridMapa = gridMapa;
         this.jugador = jugador;
         this.labelLog = labelLog;
+        this.scrollPanel = scrollPanel;
     }
 
     public void setNumJugador(int numJugador) {
@@ -91,21 +94,28 @@ public class JugadorService extends Thread {
             ejemplo.setPrefWidth(100);
             ejemplo.setPrefHeight(100);
             GridPane.setColumnSpan(ejemplo, 1);
-            ejemplo.setStyle("-fx-background-color: red; -fx-border-color: #000000;");
+            ejemplo.setStyle("-fx-background-color: rgba(255, 0, 0, 0.5); -fx-border-color: #000000;");
+
             ejemplo.setOnMouseEntered(e -> {
                 ejemplo.setStyle(
-                        "-fx-background-color: red; -fx-border-color: #000000; -fx-border-width: 2px; -fx-cursor: hand;");
+                        "-fx-background-color: rgba(255, 0, 0, 0.7); -fx-border-color: #000000; -fx-border-width: 2px; -fx-cursor: hand;");
             });
+
             ejemplo.setOnMouseExited(e -> {
                 ejemplo.setStyle(
-                        "-fx-background-color: red; -fx-border-color: #000000;");
+                        "-fx-background-color: rgba(255, 0, 0, 0.5); -fx-border-color: #000000;");
             });
         });
     }
 
+    // VERIFICAR CASILLA
     private EstadosPosicion verificarCasilla(int fila, int columna) {
-        Node nodo = getNodeFromGridPane(gridMapa, columna, fila); // Obtiene el nodo en la casilla especificada
-        return nodo == null ? EstadosPosicion.AGUA : EstadosPosicion.TOCADO; // Si el nodo es null, la casilla está //
+        for (PosicionFlota posicion : posicionFlotas) {
+            if (posicion.getFila() == fila && posicion.getColumna() == columna) {
+                return EstadosPosicion.TOCADO;
+            }
+        }
+        return EstadosPosicion.AGUA;
     }
 
     private Node getNodeFromGridPane(GridPane gridPane, int colIndex, int rowIndex) {
@@ -144,8 +154,16 @@ public class JugadorService extends Thread {
                     mensaje = "Estado desconocido";
                     break;
             }
-            labelLog.setText("Jugador: " + this.numJugador + " seleccionó la casilla: (" + fila + ", "
-                    + columna + ") - Estado: " + mensaje);
+            // Obtener el texto actual del ScrollPane
+            Text textoActual = (Text) scrollPanel.getContent();
+            String textoAnterior = textoActual.getText();
+            // Concatenar el nuevo mensaje al texto anterior
+            String nuevoTexto = textoAnterior + "\nJugador: " + this.numJugador + " seleccionó la casilla: (" + fila
+                    + ", "
+                    + columna + ") - Estado: " + mensaje;
+            // Crear un nuevo objeto Text con el nuevo texto y establecerlo en el ScrollPane
+            Text nuevoTextoNode = new Text(nuevoTexto);
+            scrollPanel.setContent(nuevoTextoNode);
         });
     }
 

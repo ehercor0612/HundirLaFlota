@@ -9,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 
@@ -27,6 +28,9 @@ public class PrimaryController {
     private Text labelLog;
 
     @FXML
+    private ScrollPane scrollPanel;
+
+    @FXML
     private Button primaryButton;
 
     @FXML
@@ -37,7 +41,7 @@ public class PrimaryController {
     @FXML
     public void initialize() {
 
-        JugadorService jugador1 = new JugadorService(1, true, gridMapa, gridRadar, jugador, labelLog);
+        JugadorService jugador1 = new JugadorService(1, true, gridMapa, gridRadar, jugador, labelLog, scrollPanel);
 
         for (Node node : this.gridMapa.getChildren()) {
             // if (GridPane.getColumnIndex(node) == 5 && GridPane.getRowIndex(node) == 5) {
