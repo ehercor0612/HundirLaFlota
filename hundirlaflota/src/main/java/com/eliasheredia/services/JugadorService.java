@@ -7,25 +7,19 @@ import com.eliasheredia.models.EstadosPosicion;
 import com.eliasheredia.models.PosicionFlota;
 
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-
-import com.eliasheredia.models.EstadosPosicion;
 
 public class JugadorService extends Thread {
 
-    // VARIABLES
     private int numJugador;
     private GridPane gridMapa;
     private GridPane gridRadar;
     private Text labelLog;
     private ScrollPane scrollPanel;
+    private int turnos; // Contador de turnos
+
     boolean estaEnTurno = false;
     boolean jugadorEnemigoEnTurno = false;
     ArrayList<PosicionFlota> posicionFlotas = new ArrayList<PosicionFlota>();
@@ -78,5 +72,14 @@ public class JugadorService extends Thread {
     public ArrayList<PosicionFlota> getPosicionFlotas() {
         return posicionFlotas;
     }
-
+    
+    // Método para obtener el número de turnos
+    public int getTurnos() {
+        return turnos;
+    }
+    
+    // Método para incrementar el contador de turnos
+    public void incrementarTurno() {
+        turnos++;
+    }
 }

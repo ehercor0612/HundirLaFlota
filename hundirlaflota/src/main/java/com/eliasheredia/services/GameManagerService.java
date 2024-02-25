@@ -24,6 +24,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 public class GameManagerService {
@@ -49,17 +50,42 @@ public class GameManagerService {
         }
 
         partidaEnCurso = true;
+
+        // Añadir los barcos para ambos jugadores
         for (JugadorService jugador : jugadores) {
             añadirBarcos(jugador);
-            jugador.start(); // Iniciar el turno del jugador
         }
-        for (JugadorService jugadorService : jugadores) {
-            seleccionarCasillaAleatoria(jugadorService);
+
+        // Iniciar el turno del primer jugador
+        if (!jugadores.isEmpty()) {
+            jugadores.get(0).start();
+            // Iniciar el turno del segundo jugador
+            if (jugadores.size() > 1) {
+                new Thread(() -> {
+                    seleccionarCasillaAleatoria(jugadores.get(1), 10); // Limitar a 10 turnos
+                }).start();
+            }
         }
     }
 
     public void terminarPartida() {
         partidaEnCurso = false;
+        Platform.runLater(() -> {
+            // Mostrar un mensaje de fin de partida en el scrollPanel
+            Text textoFinPartida = new Text("Fin de la partida");
+            scrollPanel.setContent(textoFinPartida);
+        });
+    }
+
+    // Método para detectar si el jugador actual ha seleccionado una casilla con un
+    // barco
+    private boolean detectarBarco(JugadorService jugadorActual) {
+        for (PosicionFlota posicion : jugadorActual.getPosicionFlotas()) {
+            if (posicion.getEstado() == EstadosPosicion.TOCADO) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void añadirBarcos(JugadorService jugadorActual) {
@@ -161,18 +187,35 @@ public class GameManagerService {
         });
     }
 
-    // Método para seleccionar una casilla aleatoria
-    public void seleccionarCasillaAleatoria(JugadorService jugadorActual) {
+    public void seleccionarCasillaAleatoria(JugadorService jugadorActual, int turnos) {
         Random rand = new Random();
-        int fila = rand.nextInt(11);
-        int columna = rand.nextInt(11);
+        int fila;
+        int columna;
+        EstadosPosicion estado = EstadosPosicion.AGUA;
 
-        System.out.println("Jugador: " + jugadorActual.getNumJugador() + " seleccionó la casilla: (" + fila + ", "
-                + columna + ")");
+        // Realizar el número de turnos especificado
+        for (int i = 0; i < turnos; i++) {
+            // Mientras la casilla seleccionada no contenga un barco, seguir seleccionando
+            while (estado != EstadosPosicion.TOCADO) {
+                fila = rand.nextInt(11);
+                columna = rand.nextInt(11);
 
-        EstadosPosicion estado = verificarCasilla(jugadorActual, fila, columna);
-        declararLog(fila, columna, estado, jugadorActual);
-        cambiarColorCasilla(jugadorActual, fila, columna);
+                System.out
+                        .println("Jugador: " + jugadorActual.getNumJugador() + " seleccionó la casilla: (" + fila + ", "
+                                + columna + ")");
+
+                estado = verificarCasilla(jugadorActual, fila, columna);
+                declararLog(fila, columna, estado, jugadorActual);
+                cambiarColorCasilla(jugadorActual, fila, columna);
+
+                // Retardo entre selecciones de casillas
+                try {
+                    Thread.sleep(1000); // 1 segundo
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     // Método para verificar el estado de la casilla
@@ -185,7 +228,6 @@ public class GameManagerService {
         return EstadosPosicion.AGUA;
     }
 
-    // Método para cambiar el color de la casilla
     private void cambiarColorCasilla(JugadorService jugadorActual, int fila, int columna) {
         Platform.runLater(() -> {
             Button ejemplo = new Button("");
@@ -199,17 +241,21 @@ public class GameManagerService {
             ejemplo.setPrefWidth(100);
             ejemplo.setPrefHeight(100);
             GridPane.setColumnSpan(ejemplo, 1);
+
             // Cambiar el color del botón para que sea visible en el gridRadar
-            ejemplo.setStyle("-fx-background-color: rgba(0, 255, 0, 0.5); -fx-border-color: #000000;");
+            ejemplo.setStyle(
+                    "-fx-background-color: " + Color.rgb(0, 255, 0, 0.5).toString() + "; -fx-border-color: #000000;");
 
             ejemplo.setOnMouseEntered(e -> {
                 ejemplo.setStyle(
-                        "-fx-background-color: rgba(0, 255, 0, 0.7); -fx-border-color: #000000; -fx-border-width: 2px; -fx-cursor: hand;");
+                        "-fx-background-color: " + Color.rgb(0, 255, 0, 0.7).toString()
+                                + "; -fx-border-color: #000000; -fx-border-width: 2px; -fx-cursor: hand;");
             });
 
             ejemplo.setOnMouseExited(e -> {
                 ejemplo.setStyle(
-                        "-fx-background-color: rgba(0, 255, 0, 0.5); -fx-border-color: #000000;");
+                        "-fx-background-color: " + Color.rgb(0, 255, 0, 0.5).toString()
+                                + "; -fx-border-color: #000000;");
             });
         });
     }
