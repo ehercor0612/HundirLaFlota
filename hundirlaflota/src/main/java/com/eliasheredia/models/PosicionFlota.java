@@ -5,6 +5,7 @@ public class PosicionFlota {
     private int posicionX;
     private int posicionY;
     private EstadosPosicion estado;
+    private Class<?> tipoBarco; // Añadir tipo de barco
 
     public PosicionFlota(int posicionX, int posicionY) {
         this.posicionX = posicionX;
@@ -33,5 +34,13 @@ public class PosicionFlota {
 
     public void setEstado(EstadosPosicion estado) {
         this.estado = estado;
+    }
+
+    public Class<?> getTipoBarco() { // Método para obtener el tipo de barco
+        return tipoBarco;
+    }
+
+    public void setTipoBarco(Class<?> tipoBarco) { // Método para establecer el tipo de barco
+        this.tipoBarco = tipoBarco;
     }
 }

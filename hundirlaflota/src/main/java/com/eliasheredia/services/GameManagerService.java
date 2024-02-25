@@ -3,8 +3,12 @@ package com.eliasheredia.services;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.eliasheredia.models.EstadosPosicion;
 import com.eliasheredia.models.PosicionFlota;
@@ -16,16 +20,15 @@ import com.eliasheredia.models.barcos.jugador2.Barca2;
 import com.eliasheredia.models.barcos.jugador2.Crucero2;
 import com.eliasheredia.models.barcos.jugador2.Lancha2;
 import com.eliasheredia.models.barcos.jugador2.Submarino2;
-import com.eliasheredia.services.JugadorService;
 
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.text.Text;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 
 public class GameManagerService {
 
@@ -33,6 +36,10 @@ public class GameManagerService {
     private GridPane gridRadar;
     private ScrollPane scrollPanel;
     private List<JugadorService> jugadores = new ArrayList<>();
+    private int jugadorActualIndex = 0;
+    private Timer timer;
+
+    private Set<String> casillasAtacadas = new HashSet<>();
 
     private boolean partidaEnCurso = false;
 
@@ -56,20 +63,70 @@ public class GameManagerService {
             añadirBarcos(jugador);
         }
 
-        // Iniciar el turno del primer jugador
-        if (!jugadores.isEmpty()) {
-            jugadores.get(0).start();
-            // Iniciar el turno del segundo jugador
-            if (jugadores.size() > 1) {
-                new Thread(() -> {
-                    seleccionarCasillaAleatoria(jugadores.get(1), 10); // Limitar a 10 turnos
-                }).start();
+        // Iniciar el temporizador
+        iniciarTemporizador();
+    }
+
+    private void iniciarTemporizador() {
+        if (timer == null) {
+            timer = new Timer();
+            timer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    Platform.runLater(() -> {
+                        // Obtener el jugador actual
+                        JugadorService jugadorActual = jugadores.get(jugadorActualIndex);
+
+                        // Realizar la selección del jugador actual
+                        seleccionarCasillaAleatoria(jugadorActual, 1);
+
+                        // Obtener el siguiente jugador
+                        jugadorActualIndex = (jugadorActualIndex + 1) % jugadores.size();
+                        JugadorService siguienteJugador = jugadores.get(jugadorActualIndex);
+
+                        // Iniciar el turno del siguiente jugador
+                        siguienteJugador.start();
+                    });
+                }
+            }, 0, 1500); // Cambiar el intervalo según sea necesario (en milisegundos)
+        }
+    }
+
+    public void run() {
+        int jugadorActualIndex = 0;
+
+        while (true) {
+            // Obtener el jugador actual
+            JugadorService jugadorActual = jugadores.get(jugadorActualIndex);
+
+            // Realizar la selección del jugador actual
+            seleccionarCasillaAleatoria(jugadorActual, 1);
+
+            // Obtener el siguiente jugador
+            jugadorActualIndex = (jugadorActualIndex + 1) % jugadores.size();
+            JugadorService siguienteJugador = jugadores.get(jugadorActualIndex);
+
+            // Iniciar el turno del siguiente jugador
+            Platform.runLater(() -> {
+                siguienteJugador.start();
+            });
+
+            // Esperar hasta que el siguiente jugador haya terminado su turno
+            try {
+                siguienteJugador.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
 
     public void terminarPartida() {
         partidaEnCurso = false;
+        // Cancelar el temporizador al finalizar la partida
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
         Platform.runLater(() -> {
             // Mostrar un mensaje de fin de partida en el scrollPanel
             Text textoFinPartida = new Text("Fin de la partida");
@@ -88,6 +145,11 @@ public class GameManagerService {
         return false;
     }
 
+    // Lista bidimensional para almacenar las posiciones de los barcos de cada
+    // jugador
+    private List<List<PosicionFlota>> posicionesBarcosJugadores = new ArrayList<>();
+
+    // Método para añadir los barcos para ambos jugadores y almacenar sus posiciones
     public void añadirBarcos(JugadorService jugadorActual) {
         Platform.runLater(() -> {
             try {
@@ -112,6 +174,9 @@ public class GameManagerService {
 
                 // Lista de posiciones ocupadas por los barcos generados
                 List<PosicionFlota> posicionesOcupadas = new ArrayList<>();
+
+                // Nueva lista para almacenar las posiciones de los barcos de este jugador
+                List<PosicionFlota> posicionesBarcos = new ArrayList<>();
 
                 for (Class<?> claseBarco : listaBarcosJugador) {
                     // Agregar el nombre de la clase de barco al texto
@@ -161,6 +226,11 @@ public class GameManagerService {
                                 }
 
                                 posicionesOcupadas.add(new PosicionFlota(filaActual, columnaActual));
+                                // Agregar la posición del barco a la lista de posiciones de los barcos de este
+                                // jugador
+                                PosicionFlota nuevaPosicion = new PosicionFlota(filaActual, columnaActual);
+                                nuevaPosicion.setTipoBarco(claseBarco); // Establecer el tipo de barco en la posición
+                                posicionesBarcos.add(nuevaPosicion);
 
                                 // Cargar la imagen desde el archivo correspondiente al grid
                                 Image imagen = new Image(new FileInputStream(rutaImagen));
@@ -178,6 +248,10 @@ public class GameManagerService {
                     }
                 }
 
+                // Añadir la lista de posiciones de los barcos de este jugador a la lista
+                // bidimensional
+                posicionesBarcosJugadores.add(posicionesBarcos);
+
                 // Añadir el texto al ScrollPane
                 Text texto = new Text(textoClaseBarco.toString());
                 scrollPanel.setContent(texto);
@@ -188,44 +262,116 @@ public class GameManagerService {
     }
 
     public void seleccionarCasillaAleatoria(JugadorService jugadorActual, int turnos) {
-        Random rand = new Random();
-        int fila;
-        int columna;
-        EstadosPosicion estado = EstadosPosicion.AGUA;
-
         // Realizar el número de turnos especificado
         for (int i = 0; i < turnos; i++) {
-            // Mientras la casilla seleccionada no contenga un barco, seguir seleccionando
-            while (estado != EstadosPosicion.TOCADO) {
-                fila = rand.nextInt(11);
-                columna = rand.nextInt(11);
+            Random rand = new Random();
+            int fila, columna;
 
-                System.out
-                        .println("Jugador: " + jugadorActual.getNumJugador() + " seleccionó la casilla: (" + fila + ", "
-                                + columna + ")");
+            // Determinar el jugador rival
+            JugadorService jugadorRival = obtenerJugadorRival(jugadorActual);
 
-                estado = verificarCasilla(jugadorActual, fila, columna);
-                declararLog(fila, columna, estado, jugadorActual);
-                cambiarColorCasilla(jugadorActual, fila, columna);
+            // Obtener las posiciones de los barcos del jugador rival
+            List<PosicionFlota> posicionesBarcosRival = posicionesBarcosJugadores.get(jugadores.indexOf(jugadorRival));
 
-                // Retardo entre selecciones de casillas
-                try {
-                    Thread.sleep(1000); // 1 segundo
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            // Crear un conjunto para almacenar las casillas ya atacadas por el jugador
+            // actual
+            Set<String> casillasAtacadas = new HashSet<>();
+
+            // Elegir una posición de los barcos del jugador rival para atacar
+            PosicionFlota posicionAtaque;
+            do {
+                posicionAtaque = posicionesBarcosRival.get(rand.nextInt(posicionesBarcosRival.size()));
+                fila = posicionAtaque.getFila();
+                columna = posicionAtaque.getColumna();
+            } while (!casillasAtacadas.add(fila + "-" + columna)); // Verificar si la casilla ya ha sido atacada
+
+            System.out.println(
+                    "Jugador: " + jugadorActual.getNumJugador() + " ataca la casilla: (" + fila + ", " + columna + ")");
+
+            ResultadoVerificacion resultado = verificarCasilla(jugadorRival, fila, columna);
+            declararLog(fila, columna, resultado, jugadorActual);
+            cambiarColorCasilla(jugadorActual, fila, columna);
+
+            // Retardo entre selecciones de casillas
+            try {
+                Thread.sleep(1000); // 1 segundo
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+
+            // Una vez que el jugador ha seleccionado una casilla, ceder el turno al
+            // siguiente jugador
+            JugadorService siguienteJugador = obtenerSiguienteJugador(jugadorActual);
+            Platform.runLater(() -> {
+                siguienteJugador.start();
+            });
         }
     }
 
-    // Método para verificar el estado de la casilla
-    private EstadosPosicion verificarCasilla(JugadorService jugadorActual, int fila, int columna) {
-        for (PosicionFlota posicion : jugadorActual.getPosicionFlotas()) {
+    private JugadorService obtenerJugadorRival(JugadorService jugadorActual) {
+        int indexActual = jugadores.indexOf(jugadorActual);
+        int indexRival = (indexActual + 1) % jugadores.size();
+        return jugadores.get(indexRival);
+    }
+
+    private JugadorService obtenerSiguienteJugador(JugadorService jugadorActual) {
+        int indexActual = jugadores.indexOf(jugadorActual);
+        int siguienteIndex = (indexActual + 1) % jugadores.size();
+        return jugadores.get(siguienteIndex);
+    }
+
+    // Clase para contener el resultado de la verificación de la casilla
+    class ResultadoVerificacion {
+        private EstadosPosicion estado;
+        private Class<?> tipoBarcoTocado;
+
+        public ResultadoVerificacion(EstadosPosicion estado, Class<?> tipoBarcoTocado) {
+            this.estado = estado;
+            this.tipoBarcoTocado = tipoBarcoTocado;
+        }
+
+        public EstadosPosicion getEstado() {
+            return estado;
+        }
+
+        public Class<?> getTipoBarcoTocado() {
+            return tipoBarcoTocado;
+        }
+    }
+
+    // Método para verificar el estado de la casilla y qué barco ha sido tocado
+    private ResultadoVerificacion verificarCasilla(JugadorService jugadorActual, int fila, int columna) {
+        // Recorrer la lista de posiciones de los barcos del jugador actual
+        List<PosicionFlota> posicionesBarcos = posicionesBarcosJugadores.get(jugadores.indexOf(jugadorActual));
+        for (PosicionFlota posicion : posicionesBarcos) {
+            // Comprobar si la coordenada de la casilla coincide con alguna posición de un
+            // barco
             if (posicion.getFila() == fila && posicion.getColumna() == columna) {
-                return EstadosPosicion.TOCADO;
+                // Si la posición coincide con un barco, marcarlo como tocado
+                posicion.setEstado(EstadosPosicion.TOCADO);
+                // Verificar si todas las posiciones del barco han sido tocadas
+                if (todasPosicionesTocadas(posicionesBarcos, posicion)) {
+                    // Devolver TOCADO_HUNDIDO si todas las posiciones del barco están tocadas
+                    return new ResultadoVerificacion(EstadosPosicion.TOCADO_HUNDIDO, posicion.getTipoBarco());
+                } else {
+                    // Devolver TOCADO si solo una posición del barco está tocada
+                    return new ResultadoVerificacion(EstadosPosicion.TOCADO, posicion.getTipoBarco());
+                }
             }
         }
-        return EstadosPosicion.AGUA;
+        // Si no se encuentra un barco en la casilla, devolver AGUA
+        return new ResultadoVerificacion(EstadosPosicion.AGUA, null);
+    }
+
+    // Método para verificar si todas las posiciones de un barco han sido tocadas
+    private boolean todasPosicionesTocadas(List<PosicionFlota> posicionesBarcos, PosicionFlota posicionActual) {
+        for (PosicionFlota posicion : posicionesBarcos) {
+            if (posicion.getEstado() != EstadosPosicion.TOCADO && !posicion.equals(posicionActual)) {
+                return false; // Si alguna posición del barco no está tocada y no es la posición actual,
+                              // retornar falso
+            }
+        }
+        return true; // Si todas las posiciones del barco están tocadas, retornar verdadero
     }
 
     private void cambiarColorCasilla(JugadorService jugadorActual, int fila, int columna) {
@@ -244,27 +390,27 @@ public class GameManagerService {
 
             // Cambiar el color del botón para que sea visible en el gridRadar
             ejemplo.setStyle(
-                    "-fx-background-color: " + Color.rgb(0, 255, 0, 0.5).toString() + "; -fx-border-color: #000000;");
+                    "-fx-background-color: " + Color.rgb(255, 255, 0, 0.5).toString() + "; -fx-border-color: #000000;");
 
             ejemplo.setOnMouseEntered(e -> {
                 ejemplo.setStyle(
-                        "-fx-background-color: " + Color.rgb(0, 255, 0, 0.7).toString()
+                        "-fx-background-color: " + Color.rgb(255, 255, 0, 0.7).toString()
                                 + "; -fx-border-color: #000000; -fx-border-width: 2px; -fx-cursor: hand;");
             });
 
             ejemplo.setOnMouseExited(e -> {
                 ejemplo.setStyle(
-                        "-fx-background-color: " + Color.rgb(0, 255, 0, 0.5).toString()
+                        "-fx-background-color: " + Color.rgb(255, 255, 0, 0.5).toString()
                                 + "; -fx-border-color: #000000;");
             });
         });
     }
 
     // Método para declarar el estado de la casilla en el log
-    private void declararLog(int fila, int columna, EstadosPosicion estado, JugadorService jugadorActual) {
+    private void declararLog(int fila, int columna, ResultadoVerificacion resultado, JugadorService jugadorActual) {
         Platform.runLater(() -> {
             String mensaje;
-            switch (estado) {
+            switch (resultado.getEstado()) {
                 case AGUA:
                     mensaje = "AGUA";
                     break;
@@ -278,15 +424,18 @@ public class GameManagerService {
                     mensaje = "Estado desconocido";
                     break;
             }
+            String tipoBarcoTocado = resultado.getTipoBarcoTocado() != null
+                    ? resultado.getTipoBarcoTocado().getSimpleName()
+                    : "Ninguno";
             // Obtener el texto actual del ScrollPane
             Text textoActual = (Text) scrollPanel.getContent();
             String textoAnterior = textoActual.getText();
             // Concatenar el nuevo mensaje al texto anterior
             String nuevoTexto = textoAnterior + "\nJugador " + jugadorActual.getNumJugador()
                     + " seleccionó la casilla: ("
-                    + fila
+                    + (fila + 1)
                     + ", "
-                    + columna + ") - Estado: " + mensaje;
+                    + (columna + 1) + ") - Estado: " + mensaje + " - Barco Tocado: " + tipoBarcoTocado;
             // Crear un nuevo objeto Text con el nuevo texto y establecerlo en el ScrollPane
             Text nuevoTextoNode = new Text(nuevoTexto);
             scrollPanel.setContent(nuevoTextoNode);
