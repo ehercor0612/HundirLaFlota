@@ -40,6 +40,7 @@ public class GameManagerService {
     private Timer timer;
 
     private Set<String> casillasAtacadas = new HashSet<>();
+    private double probabilidadAtaqueExitoso = 1.0;
 
     private boolean partidaEnCurso = false;
 
@@ -265,7 +266,8 @@ public class GameManagerService {
         // Realizar el número de turnos especificado
         for (int i = 0; i < turnos; i++) {
             Random rand = new Random();
-            int fila, columna;
+            int fila = -1;
+            int columna = -1;
 
             // Determinar el jugador rival
             JugadorService jugadorRival = obtenerJugadorRival(jugadorActual);
@@ -273,17 +275,42 @@ public class GameManagerService {
             // Obtener las posiciones de los barcos del jugador rival
             List<PosicionFlota> posicionesBarcosRival = posicionesBarcosJugadores.get(jugadores.indexOf(jugadorRival));
 
-            // Crear un conjunto para almacenar las casillas ya atacadas por el jugador
-            // actual
-            Set<String> casillasAtacadas = new HashSet<>();
-
             // Elegir una posición de los barcos del jugador rival para atacar
-            PosicionFlota posicionAtaque;
-            do {
-                posicionAtaque = posicionesBarcosRival.get(rand.nextInt(posicionesBarcosRival.size()));
-                fila = posicionAtaque.getFila();
-                columna = posicionAtaque.getColumna();
-            } while (!casillasAtacadas.add(fila + "-" + columna)); // Verificar si la casilla ya ha sido atacada
+            PosicionFlota posicionAtaque = null;
+            boolean ataqueExitoso = rand.nextDouble() < probabilidadAtaqueExitoso; // Define probabilidadAtaqueExitoso
+
+            if (ataqueExitoso) {
+                // Si el ataque es exitoso, seleccionar una posición de los barcos del jugador
+                // rival para atacar
+                int intentos = 0;
+                do {
+                    posicionAtaque = posicionesBarcosRival.get(rand.nextInt(posicionesBarcosRival.size()));
+                    fila = posicionAtaque.getFila();
+                    columna = posicionAtaque.getColumna();
+                    intentos++;
+                    // Verificar si la casilla ya ha sido atacada y si se han hecho demasiados
+                    // intentos
+                } while (casillasAtacadas.contains(fila + "-" + columna) && intentos < 100); // Evitar bucle infinito
+
+                // Si se supera el número máximo de intentos, seleccionar una posición aleatoria
+                // que no haya sido atacada
+                if (intentos >= 100) {
+                    do {
+                        fila = rand.nextInt(11); // Número de filas en el tablero
+                        columna = rand.nextInt(11); // Número de columnas en el tablero
+                    } while (casillasAtacadas.contains(fila + "-" + columna));
+                }
+            } else {
+                // Si el ataque no es exitoso, seleccionar una posición aleatoria que no haya
+                // sido atacada
+                do {
+                    fila = rand.nextInt(11); // Número de filas en el tablero
+                    columna = rand.nextInt(11); // Número de columnas en el tablero
+                } while (casillasAtacadas.contains(fila + "-" + columna)); // Verificar si la casilla ya ha sido atacada
+            }
+
+            // Agregar la casilla al conjunto de casillas atacadas
+            casillasAtacadas.add(fila + "-" + columna);
 
             System.out.println(
                     "Jugador: " + jugadorActual.getNumJugador() + " ataca la casilla: (" + fila + ", " + columna + ")");
