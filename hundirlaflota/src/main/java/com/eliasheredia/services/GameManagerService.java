@@ -43,7 +43,7 @@ public class GameManagerService {
     public int puntosJugador2 = 0;
 
     private Set<String> casillasAtacadas = new HashSet<>();
-    private double probabilidadAtaqueExitoso = 1.0;
+    private double probabilidadAtaqueExitoso = 0.9;
 
     private boolean partidaEnCurso = false;
 
@@ -88,7 +88,9 @@ public class GameManagerService {
                         if (puntosJugador1 == 4) {
                             String ganador = "jugador 2";
                             terminarPartida(ganador);
-                        } else if (puntosJugador2 == 4) {
+                        }
+
+                        if (puntosJugador2 == 4) {
                             String ganador = "jugador 1";
                             terminarPartida(ganador);
                         }
