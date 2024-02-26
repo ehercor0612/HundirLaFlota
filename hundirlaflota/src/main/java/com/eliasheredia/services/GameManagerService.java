@@ -39,6 +39,9 @@ public class GameManagerService {
     private int jugadorActualIndex = 0;
     private Timer timer;
 
+    public int puntosJugador1 = 0;
+    public int puntosJugador2 = 0;
+
     private Set<String> casillasAtacadas = new HashSet<>();
     private double probabilidadAtaqueExitoso = 1.0;
 
@@ -75,11 +78,20 @@ public class GameManagerService {
                 @Override
                 public void run() {
                     Platform.runLater(() -> {
+
                         // Obtener el jugador actual
                         JugadorService jugadorActual = jugadores.get(jugadorActualIndex);
 
                         // Realizar la selección del jugador actual
                         seleccionarCasillaAleatoria(jugadorActual, 1);
+
+                        if (puntosJugador1 == 4) {
+                            String ganador = "jugador 2";
+                            terminarPartida(ganador);
+                        } else if (puntosJugador2 == 4) {
+                            String ganador = "jugador 1";
+                            terminarPartida(ganador);
+                        }
 
                         // Obtener el siguiente jugador
                         jugadorActualIndex = (jugadorActualIndex + 1) % jugadores.size();
@@ -93,35 +105,7 @@ public class GameManagerService {
         }
     }
 
-    public void run() {
-        int jugadorActualIndex = 0;
-
-        while (true) {
-            // Obtener el jugador actual
-            JugadorService jugadorActual = jugadores.get(jugadorActualIndex);
-
-            // Realizar la selección del jugador actual
-            seleccionarCasillaAleatoria(jugadorActual, 1);
-
-            // Obtener el siguiente jugador
-            jugadorActualIndex = (jugadorActualIndex + 1) % jugadores.size();
-            JugadorService siguienteJugador = jugadores.get(jugadorActualIndex);
-
-            // Iniciar el turno del siguiente jugador
-            Platform.runLater(() -> {
-                siguienteJugador.start();
-            });
-
-            // Esperar hasta que el siguiente jugador haya terminado su turno
-            try {
-                siguienteJugador.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void terminarPartida() {
+    public void terminarPartida(String ganador) {
         partidaEnCurso = false;
         // Cancelar el temporizador al finalizar la partida
         if (timer != null) {
@@ -130,7 +114,7 @@ public class GameManagerService {
         }
         Platform.runLater(() -> {
             // Mostrar un mensaje de fin de partida en el scrollPanel
-            Text textoFinPartida = new Text("Fin de la partida");
+            Text textoFinPartida = new Text("Fin de la partida - Gana " + ganador);
             scrollPanel.setContent(textoFinPartida);
         });
     }
@@ -374,6 +358,7 @@ public class GameManagerService {
     private ResultadoVerificacion verificarCasilla(JugadorService jugadorActual, int fila, int columna) {
         // Recorrer la lista de posiciones de los barcos del jugador rival
         List<PosicionFlota> posicionesBarcos = posicionesBarcosJugadores.get(jugadores.indexOf(jugadorActual));
+        int quienJuega = jugadorActual.getNumJugador();
         for (PosicionFlota posicion : posicionesBarcos) {
             // Comprobar si la coordenada de la casilla coincide con alguna posición de un
             // barco
@@ -385,6 +370,13 @@ public class GameManagerService {
                 // Verificar si todas las posiciones del barco han sido tocadas
                 if (barcoCompletoHundido(posicionesBarcos, posicion.getTipoBarco())) {
                     // Devolver TOCADO_HUNDIDO si todas las posiciones del barco están tocadas
+                    if (quienJuega == 1) {
+                        this.puntosJugador1++;
+                        System.out.println("PUNTO PARA JUGADOR 1");
+                    } else {
+                        this.puntosJugador2++;
+                        System.out.println("PUNTO PARA JUGADOR 2");
+                    }
                     return new ResultadoVerificacion(EstadosPosicion.TOCADO_HUNDIDO, posicion.getTipoBarco());
                 } else {
                     // Devolver TOCADO si solo una posición del barco está tocada
