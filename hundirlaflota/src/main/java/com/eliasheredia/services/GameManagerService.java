@@ -188,7 +188,7 @@ public class GameManagerService {
                     Object barco = claseBarco.getDeclaredConstructor().newInstance();
 
                     // Obtener el tamaño del barco
-                    int tamanoBarco = claseBarco.getDeclaredField("tamano").getInt(null);
+                    int tamanoBarco = (int) claseBarco.getDeclaredField("tamano").get(barco);
 
                     boolean generado = false;
 
