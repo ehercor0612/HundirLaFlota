@@ -10,7 +10,6 @@ public class PosicionFlota {
     private int tamano;
 
     public PosicionFlota(int posicionX, int posicionY, int tamano) {
-        // Constructor actualizado para inicializar el tamaño del barco
         this.posicionX = posicionX;
         this.posicionY = posicionY;
         this.tamano = tamano;

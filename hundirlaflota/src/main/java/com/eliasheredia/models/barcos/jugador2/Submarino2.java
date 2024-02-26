@@ -6,7 +6,7 @@ public class Submarino2 {
     public boolean hundido;
 
     public Submarino2() {
-        this.nombre = "Submarino ruso";
+        this.nombre = "Submarino gatuno 2";
         this.hundido = false;
     }
 

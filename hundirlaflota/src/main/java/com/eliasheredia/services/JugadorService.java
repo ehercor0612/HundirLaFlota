@@ -1,12 +1,9 @@
 package com.eliasheredia.services;
 
 import java.util.ArrayList;
-import java.util.Random;
 
-import com.eliasheredia.models.EstadosPosicion;
 import com.eliasheredia.models.PosicionFlota;
 
-import javafx.application.Platform;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
@@ -72,13 +69,11 @@ public class JugadorService extends Thread {
     public ArrayList<PosicionFlota> getPosicionFlotas() {
         return posicionFlotas;
     }
-    
-    // Método para obtener el número de turnos
+
     public int getTurnos() {
         return turnos;
     }
-    
-    // Método para incrementar el contador de turnos
+
     public void incrementarTurno() {
         turnos++;
     }

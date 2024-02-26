@@ -45,23 +45,23 @@ public class App extends Application {
         scrollPanel = (ScrollPane) scene.lookup("#scroll");
         labelLog = (Text) scene.lookup("#labelLog");
 
-        // Crear instancias de los jugadores
+        // Crea instancias de los jugadores
         JugadorService jugador1 = new JugadorService(1, true, gridMapa, gridRadar, labelLog, scrollPanel);
         JugadorService jugador2 = new JugadorService(2, false, gridMapa, gridRadar, labelLog, scrollPanel);
 
-        // Configurar gridMapa en cada jugador
+        // Configura gridMapa en cada jugador
         jugador1.setGridMapa(gridMapa);
         jugador2.setGridRadar(gridRadar);
 
-        // Agregar jugadores a la lista de jugadores
+        // Agrega jugadores a la lista de jugadores
         List<JugadorService> jugadores = new ArrayList<>();
         jugadores.add(jugador1);
         jugadores.add(jugador2);
 
-        // Crear instancia de GameManagerService
+        // Crea instancia de GameManagerService
         GameManagerService gameManager = new GameManagerService(jugadores, gridMapa, gridRadar, scrollPanel);
 
-        // Iniciar la partida
+        // Inicia la partida
         gameManager.iniciarPartida();
 
     }

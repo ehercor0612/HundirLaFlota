@@ -38,15 +38,13 @@ public class PrimaryController {
     @FXML
     public void initialize() {
 
-        JugadorService jugador1 = new JugadorService(1, true, gridMapa, gridRadar, labelLog, scrollPanel);
-
         for (Node node : this.gridMapa.getChildren()) {
             // if (GridPane.getColumnIndex(node) == 5 && GridPane.getRowIndex(node) == 5) {
             node.setStyle("-fx-background-color: red;");
             // }
         }
 
-        // MAPA
+        // MAPA 1
         for (int rowX = 0; rowX < 11; rowX++) {
             for (int rowY = 0; rowY < 11; rowY++) {
                 Button ejemplo = new Button("");
@@ -66,7 +64,7 @@ public class PrimaryController {
             }
         }
 
-        // RADAR
+        // MAPA 2
         for (int rowX = 0; rowX < 11; rowX++) {
             for (int rowY = 0; rowY < 11; rowY++) {
                 Button ejemplo = new Button("");

@@ -6,7 +6,7 @@ public class Barca2 {
     public boolean hundido;
 
     public Barca2() {
-        this.nombre = "Barca rusa";
+        this.nombre = "Barca gatuna 2";
         this.hundido = false;
     }
 
