@@ -2,12 +2,11 @@ package com.eliasheredia.models.barcos.jugador1;
 
 public class Crucero1 {
     public String nombre;
-    public int tamano;
+    public static final int tamano = 4;
     public boolean hundido;
 
     public Crucero1() {
         this.nombre = "Crucero americano";
-        this.tamano = 4;
         this.hundido = false;
     }
 

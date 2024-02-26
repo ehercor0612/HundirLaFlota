@@ -188,7 +188,7 @@ public class GameManagerService {
                     Object barco = claseBarco.getDeclaredConstructor().newInstance();
 
                     // Obtener el tamaño del barco
-                    int tamanoBarco = (int) claseBarco.getDeclaredField("tamano").get(barco);
+                    int tamanoBarco = claseBarco.getDeclaredField("tamano").getInt(null);
 
                     boolean generado = false;
 
@@ -226,10 +226,10 @@ public class GameManagerService {
                                     }
                                 }
 
-                                posicionesOcupadas.add(new PosicionFlota(filaActual, columnaActual));
+                                posicionesOcupadas.add(new PosicionFlota(filaActual, columnaActual, tamanoBarco));
                                 // Agregar la posición del barco a la lista de posiciones de los barcos de este
                                 // jugador
-                                PosicionFlota nuevaPosicion = new PosicionFlota(filaActual, columnaActual);
+                                PosicionFlota nuevaPosicion = new PosicionFlota(filaActual, columnaActual, tamanoBarco);
                                 nuevaPosicion.setTipoBarco(claseBarco); // Establecer el tipo de barco en la posición
                                 posicionesBarcos.add(nuevaPosicion);
 
@@ -372,7 +372,7 @@ public class GameManagerService {
 
     // Método para verificar el estado de la casilla y qué barco ha sido tocado
     private ResultadoVerificacion verificarCasilla(JugadorService jugadorActual, int fila, int columna) {
-        // Recorrer la lista de posiciones de los barcos del jugador actual
+        // Recorrer la lista de posiciones de los barcos del jugador rival
         List<PosicionFlota> posicionesBarcos = posicionesBarcosJugadores.get(jugadores.indexOf(jugadorActual));
         for (PosicionFlota posicion : posicionesBarcos) {
             // Comprobar si la coordenada de la casilla coincide con alguna posición de un
@@ -380,8 +380,10 @@ public class GameManagerService {
             if (posicion.getFila() == fila && posicion.getColumna() == columna) {
                 // Si la posición coincide con un barco, marcarlo como tocado
                 posicion.setEstado(EstadosPosicion.TOCADO);
+                posicion.incrementarVecesTocado(); // Incrementar el contador de veces tocado
+
                 // Verificar si todas las posiciones del barco han sido tocadas
-                if (todasPosicionesTocadas(posicionesBarcos, posicion)) {
+                if (barcoCompletoHundido(posicionesBarcos, posicion.getTipoBarco())) {
                     // Devolver TOCADO_HUNDIDO si todas las posiciones del barco están tocadas
                     return new ResultadoVerificacion(EstadosPosicion.TOCADO_HUNDIDO, posicion.getTipoBarco());
                 } else {
@@ -395,14 +397,34 @@ public class GameManagerService {
     }
 
     // Método para verificar si todas las posiciones de un barco han sido tocadas
-    private boolean todasPosicionesTocadas(List<PosicionFlota> posicionesBarcos, PosicionFlota posicionActual) {
+    private boolean barcoCompletoHundido(List<PosicionFlota> posicionesBarcos, Class<?> tipoBarco) {
+        // Contador para las posiciones tocadas del barco
+        int posicionesTocadas = 0;
+
+        // Contar el número de posiciones tocadas del barco
         for (PosicionFlota posicion : posicionesBarcos) {
-            if (posicion.getEstado() != EstadosPosicion.TOCADO && !posicion.equals(posicionActual)) {
-                return false; // Si alguna posición del barco no está tocada y no es la posición actual,
-                              // retornar falso
+            // Verificar si la posición pertenece al barco y está tocada
+            if (posicion.getTipoBarco().equals(tipoBarco) && posicion.getEstado() == EstadosPosicion.TOCADO) {
+                posicionesTocadas++;
             }
         }
-        return true; // Si todas las posiciones del barco están tocadas, retornar verdadero
+
+        // Obtener el tamaño total del barco
+        int tamanoTotalBarco = Arrays.stream(tipoBarco.getDeclaredFields())
+                .filter(field -> field.getName().equals("tamano"))
+                .mapToInt(field -> {
+                    try {
+                        return field.getInt(null);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                        return 0;
+                    }
+                })
+                .findFirst()
+                .orElse(0);
+
+        // Verificar si todas las posiciones del barco han sido tocadas
+        return posicionesTocadas == tamanoTotalBarco;
     }
 
     private void cambiarColorCasilla(JugadorService jugadorActual, int fila, int columna) {

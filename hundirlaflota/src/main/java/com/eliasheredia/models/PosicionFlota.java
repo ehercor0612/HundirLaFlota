@@ -5,11 +5,27 @@ public class PosicionFlota {
     private int posicionX;
     private int posicionY;
     private EstadosPosicion estado;
-    private Class<?> tipoBarco; // Añadir tipo de barco
+    private Class<?> tipoBarco;
+    private int vecesTocado = 0;
+    private int tamano;
 
-    public PosicionFlota(int posicionX, int posicionY) {
+    public PosicionFlota(int posicionX, int posicionY, int tamano) {
+        // Constructor actualizado para inicializar el tamaño del barco
         this.posicionX = posicionX;
         this.posicionY = posicionY;
+        this.tamano = tamano;
+    }
+
+    public void incrementarVecesTocado() {
+        vecesTocado++;
+    }
+
+    public int getVecesTocado() {
+        return vecesTocado;
+    }
+
+    public int getTamano() {
+        return tamano;
     }
 
     public int getFila() {
@@ -36,11 +52,11 @@ public class PosicionFlota {
         this.estado = estado;
     }
 
-    public Class<?> getTipoBarco() { // Método para obtener el tipo de barco
+    public Class<?> getTipoBarco() {
         return tipoBarco;
     }
 
-    public void setTipoBarco(Class<?> tipoBarco) { // Método para establecer el tipo de barco
+    public void setTipoBarco(Class<?> tipoBarco) {
         this.tipoBarco = tipoBarco;
     }
 }
